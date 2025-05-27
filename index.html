@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Average Calculator Microservice</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Average Calculator Microservice</h1>
+    <form id="numberForm">
+      <label for="numberid">Enter Number ID (p, f, e, r):</label>
+      <input type="text" id="numberid" name="numberid" maxlength="1" required>
+      <button type="submit">Get Numbers</button>
+    </form>
+
+    <div id="responseContainer" class="response">
+      <!-- API response will appear here -->
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('numberForm');
+    const responseContainer = document.getElementById('responseContainer');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const numberid = document.getElementById('numberid').value.trim().toLowerCase();
+      if (!['p', 'f', 'e', 'r'].includes(numberid)) {
+        responseContainer.innerHTML = "<p class='error'>Invalid input. Use p, f, e, or r.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8000/numbers/${numberid}`);
+        const data = await res.json();
+
+        responseContainer.innerHTML = `
+          <h3>Result</h3>
+          <p><strong>Window Previous State:</strong> [${data.windowPrevState.join(", ")}]</p>
+          <p><strong>Window Current State:</strong> [${data.windowCurrState.join(", ")}]</p>
+          <p><strong>Fetched Numbers:</strong> [${data.numbers.join(", ")}]</p>
+          <p><strong>Average:</strong> ${data.avg.toFixed(2)}</p>
+        `;
+      } catch (err) {
+        responseContainer.innerHTML = "<p class='error'>Error fetching data from server.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
